@@ -1,0 +1,144 @@
+From 35860ff0e4b353ab4cd223844e674ca295908c66 Mon Sep 17 00:00:00 2001
+From: Colin Walters <walters@verbum.org>
+Date: Wed, 16 Jul 2014 19:27:26 -0400
+Subject: [PATCH] hack/install-package.sh: New file, add unit files
+
+For packaging, it's convenient to reuse the exisiting BINARIES=
+variable.  This allows the equivalent of "make install DESTDIR=".
+---
+ hack/build-go.sh                           |  2 --
+ hack/config-go.sh                          |  3 +++
+ hack/install-package.sh                    | 29 +++++++++++++++++++++++++++++
+ init/kubernetes-apiserver.service          | 10 ++++++++++
+ init/kubernetes-controller-manager.service |  8 ++++++++
+ init/kubernetes-kubelet.service            |  9 +++++++++
+ init/kubernetes-proxy.service              |  9 +++++++++
+ 7 files changed, 68 insertions(+), 2 deletions(-)
+ create mode 100755 hack/install-package.sh
+ create mode 100644 init/kubernetes-apiserver.service
+ create mode 100644 init/kubernetes-controller-manager.service
+ create mode 100644 init/kubernetes-kubelet.service
+ create mode 100644 init/kubernetes-proxy.service
+
+diff --git a/hack/build-go.sh b/hack/build-go.sh
+index 4b41ec1..84681b7 100755
+--- a/hack/build-go.sh
++++ b/hack/build-go.sh
+@@ -25,8 +25,6 @@ source $(dirname $0)/config-go.sh
+ 
+ cd "${KUBE_TARGET}"
+ 
+-BINARIES="proxy integration apiserver controller-manager kubelet kubecfg"
+-
+ if [ $# -gt 0 ]; then
+   BINARIES="$@"
+ fi
+diff --git a/hack/config-go.sh b/hack/config-go.sh
+index e25421b..cbd8ebc 100755
+--- a/hack/config-go.sh
++++ b/hack/config-go.sh
+@@ -62,3 +62,6 @@ KUBE_GO_PACKAGE_DIR="${GOPATH}/src/${KUBE_GO_PACKAGE}"
+   ln -s "${KUBE_REPO_ROOT}" "${KUBE_GO_PACKAGE_DIR}"
+ )
+ export GOPATH="${KUBE_TARGET}:${KUBE_REPO_ROOT}/third_party"
++
++# Default to building all of the components
++BINARIES="proxy integration apiserver controller-manager kubelet kubecfg"
+diff --git a/hack/install-package.sh b/hack/install-package.sh
+new file mode 100755
+index 0000000..89acb33
+--- /dev/null
++++ b/hack/install-package.sh
+@@ -0,0 +1,29 @@
++#!/bin/bash
++
++# Copyright 2014 Google Inc. All rights reserved.
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#     http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++# This script sets up a go workspace locally and builds all go components.
++
++set -e
++
++source $(dirname $0)/config-go.sh
++
++cd "${KUBE_TARGET}"
++
++install -d $DESTDIR/usr/bin
++for b in $BINARIES; do
++  echo "+++ INSTALLING ${b}"
++  install -p -m 755 ${b} $DESTDIR/usr/bin/kubernetes-${b}
++done
+diff --git a/init/kubernetes-apiserver.service b/init/kubernetes-apiserver.service
+new file mode 100644
+index 0000000..d2eb10d
+--- /dev/null
++++ b/init/kubernetes-apiserver.service
+@@ -0,0 +1,10 @@
++[Unit]
++Description=Kubernetes API Server
++
++[Service]
++EnvironmentFile=/etc/sysconfig/kubernetes
++ExecStart=/usr/bin/kubernetes-apiserver --logtostderr=true --etcd_servers=$KUBE_ETCD_SERVERS --address=127.0.0.1 --port=8080 --machines=
++
++[Install]
++WantedBy=multi-user.target
++ 
+diff --git a/init/kubernetes-controller-manager.service b/init/kubernetes-controller-manager.service
+new file mode 100644
+index 0000000..f4802bc
+--- /dev/null
++++ b/init/kubernetes-controller-manager.service
+@@ -0,0 +1,8 @@
++[Unit]
++Description=Kubernetes Controller Manager
++
++[Service]
++ExecStart=/usr/bin/kubernetes-controller-manager --logtostderr=true --etcd_servers=$KUBE_ETC_SERVERS --master=$KUBE_MASTER
++
++[Install]
++WantedBy=multi-user.target
+diff --git a/init/kubernetes-kubelet.service b/init/kubernetes-kubelet.service
+new file mode 100644
+index 0000000..e7e5507
+--- /dev/null
++++ b/init/kubernetes-kubelet.service
+@@ -0,0 +1,9 @@
++[Unit]
++Description=Kubernetes Kubelet
++
++[Service]
++EnvironmentFile=/etc/sysconfig/kubernetes
++ExecStart=/usr/bin/kubernetes-kubelet --logtostderr=true --etcd_servers=$KUBE_ETCD_SERVERS
++
++[Install]
++WantedBy=multi-user.target
+diff --git a/init/kubernetes-proxy.service b/init/kubernetes-proxy.service
+new file mode 100644
+index 0000000..3034b09
+--- /dev/null
++++ b/init/kubernetes-proxy.service
+@@ -0,0 +1,9 @@
++[Unit]
++Description=Kubernetes Proxy
++
++[Service]
++EnvironmentFile=/etc/sysconfig/kubernetes
++ExecStart=/usr/bin/kubernetes-proxy --logtostderr=true --etcd_servers=$KUBE_ETCD_SERVERS
++
++[Install]
++WantedBy=multi-user.target
+-- 
+1.8.3.1
+
