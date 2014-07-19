@@ -7,7 +7,7 @@
 
 Name:           kubernetes
 Version:        0
-Release:        0.0.2.git%{shortcommit}%{?dist}
+Release:        0.0.5.git%{shortcommit}%{?dist}
 Summary:        Kubernetes container management
 License:        ASL 2.0
 URL:            https://github.com/GoogleCloudPlatform/kubernetes
@@ -15,8 +15,10 @@ ExclusiveArch:  x86_64
 Source0:        https://github.com/GoogleCloudPlatform/kubernetes/archive/%{commit}/kubernetes-%{shortcommit}.tar.gz
 Patch1:         0001-hack-install-package.sh-New-file-add-unit-files.patch
 BuildRequires:  gcc
+BuildRequires:  git
 BuildRequires:  golang >= 1.2-7
 Requires:       /usr/bin/docker
+Requires:       etcd
 
 %description
 %{summary}
