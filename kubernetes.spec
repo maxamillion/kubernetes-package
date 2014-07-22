@@ -21,6 +21,7 @@ Requires:       /usr/bin/docker
 Requires:       etcd
 
 BuildRequires:	golang(github.com/coreos/go-log/log)
+BuildRequires:	golang(github.com/coreos/go-systemd)
 
 %description
 %{summary}
@@ -28,7 +29,7 @@ BuildRequires:	golang(github.com/coreos/go-log/log)
 %prep
 %autosetup -Sgit -n %{name}-%{commit}
 
-rm -r third_party/src/github.com/coreos/go-log
+rm -r third_party/src/github.com/coreos/{go-log,go-systemd}
 
 %build
 env GOPATH="${PWD}:%{_datadir}/gocode" ./hack/build-go.sh
