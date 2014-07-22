@@ -7,7 +7,7 @@
 
 Name:           kubernetes
 Version:        0
-Release:        0.0.7.git%{shortcommit}%{?dist}
+Release:        0.0.8.git%{shortcommit}%{?dist}
 Summary:        Kubernetes container management
 License:        ASL 2.0
 URL:            https://github.com/GoogleCloudPlatform/kubernetes
@@ -23,6 +23,7 @@ Requires:       etcd
 BuildRequires:	golang(github.com/coreos/go-log/log)
 BuildRequires:	golang(github.com/coreos/go-systemd)
 BuildRequires:	golang(github.com/coreos/go-etcd/etcd)
+BuildRequires:  golang(github.com/fsouza/go-dockerclient)
 
 %description
 %{summary}
@@ -31,6 +32,7 @@ BuildRequires:	golang(github.com/coreos/go-etcd/etcd)
 %autosetup -Sgit -n %{name}-%{commit}
 
 rm -r third_party/src/github.com/coreos/go-{log,systemd,etcd}
+rm -r third_party/src/github.com/fsouza/go-dockerclient
 
 %build
 env GOPATH="${PWD}:%{_datadir}/gocode" ./hack/build-go.sh
