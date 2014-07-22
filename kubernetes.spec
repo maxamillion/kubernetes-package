@@ -7,7 +7,7 @@
 
 Name:           kubernetes
 Version:        0
-Release:        0.0.8.git%{shortcommit}%{?dist}
+Release:        0.0.9.git%{shortcommit}%{?dist}
 Summary:        Kubernetes container management
 License:        ASL 2.0
 URL:            https://github.com/GoogleCloudPlatform/kubernetes
@@ -33,6 +33,13 @@ BuildRequires:  golang(github.com/fsouza/go-dockerclient)
 
 rm -r third_party/src/github.com/coreos/go-{log,systemd,etcd}
 rm -r third_party/src/github.com/fsouza/go-dockerclient
+
+# Preserve just a subset of cAdvisor, but not all of the source
+mkdir cadvisor_api
+mv third_party/src/github.com/google/cadvisor/{client,info} cadvisor_api
+rm -r third_party/src/github.com/google/cadvisor/
+mkdir third_party/src/github.com/google/cadvisor/
+mv cadvisor_api/* third_party/src/github.com/google/cadvisor/
 
 %build
 env GOPATH="${PWD}:%{_datadir}/gocode" ./hack/build-go.sh
