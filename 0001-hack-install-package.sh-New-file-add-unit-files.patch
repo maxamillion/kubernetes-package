@@ -1,4 +1,4 @@
-From 35860ff0e4b353ab4cd223844e674ca295908c66 Mon Sep 17 00:00:00 2001
+From ac4a2c575551fcd447b81b8c663bd099f472df5f Mon Sep 17 00:00:00 2001
 From: Colin Walters <walters@verbum.org>
 Date: Wed, 16 Jul 2014 19:27:26 -0400
 Subject: [PATCH] hack/install-package.sh: New file, add unit files
@@ -7,13 +7,13 @@ For packaging, it's convenient to reuse the exisiting BINARIES=
 variable.  This allows the equivalent of "make install DESTDIR=".
 ---
  hack/build-go.sh                           |  2 --
- hack/config-go.sh                          |  3 +++
+ hack/config-go.sh                          |  6 +++++-
  hack/install-package.sh                    | 29 +++++++++++++++++++++++++++++
  init/kubernetes-apiserver.service          | 10 ++++++++++
  init/kubernetes-controller-manager.service |  8 ++++++++
  init/kubernetes-kubelet.service            |  9 +++++++++
  init/kubernetes-proxy.service              |  9 +++++++++
- 7 files changed, 68 insertions(+), 2 deletions(-)
+ 7 files changed, 70 insertions(+), 3 deletions(-)
  create mode 100755 hack/install-package.sh
  create mode 100644 init/kubernetes-apiserver.service
  create mode 100644 init/kubernetes-controller-manager.service
@@ -34,13 +34,23 @@ index 4b41ec1..84681b7 100755
    BINARIES="$@"
  fi
 diff --git a/hack/config-go.sh b/hack/config-go.sh
-index e25421b..cbd8ebc 100755
+index e25421b..a687ae3 100755
 --- a/hack/config-go.sh
 +++ b/hack/config-go.sh
-@@ -62,3 +62,6 @@ KUBE_GO_PACKAGE_DIR="${GOPATH}/src/${KUBE_GO_PACKAGE}"
+@@ -49,6 +49,7 @@ KUBE_TARGET="${KUBE_REPO_ROOT}/output/go"
+ mkdir -p "${KUBE_TARGET}"
+ 
+ KUBE_GO_PACKAGE=github.com/GoogleCloudPlatform/kubernetes
++ORIG_GOPATH="$GOPATH"
+ export GOPATH="${KUBE_TARGET}"
+ KUBE_GO_PACKAGE_DIR="${GOPATH}/src/${KUBE_GO_PACKAGE}"
+ 
+@@ -61,4 +62,7 @@ KUBE_GO_PACKAGE_DIR="${GOPATH}/src/${KUBE_GO_PACKAGE}"
+   rm "${KUBE_GO_PACKAGE_DIR}" >/dev/null 2>&1 || true
    ln -s "${KUBE_REPO_ROOT}" "${KUBE_GO_PACKAGE_DIR}"
  )
- export GOPATH="${KUBE_TARGET}:${KUBE_REPO_ROOT}/third_party"
+-export GOPATH="${KUBE_TARGET}:${KUBE_REPO_ROOT}/third_party"
++export GOPATH="${KUBE_TARGET}:${KUBE_REPO_ROOT}/third_party${ORIG_GOPATH:+:$ORIG_GOPATH}"
 +
 +# Default to building all of the components
 +BINARIES="proxy integration apiserver controller-manager kubelet kubecfg"
