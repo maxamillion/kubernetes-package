@@ -7,7 +7,7 @@
 
 Name:           kubernetes
 Version:        0
-Release:        0.0.9.git%{shortcommit}%{?dist}
+Release:        0.0.11.git%{shortcommit}%{?dist}
 Summary:        Kubernetes container management
 License:        ASL 2.0
 URL:            https://github.com/GoogleCloudPlatform/kubernetes
@@ -24,6 +24,8 @@ BuildRequires:	golang(github.com/coreos/go-log/log)
 BuildRequires:	golang(github.com/coreos/go-systemd)
 BuildRequires:	golang(github.com/coreos/go-etcd/etcd)
 BuildRequires:  golang(github.com/fsouza/go-dockerclient)
+BuildRequires:  golang(code.google.com/p/go.net)
+
 
 %description
 %{summary}
@@ -49,6 +51,9 @@ env DESTDIR=$RPM_BUILD_ROOT ./hack/install-package.sh
 install -d -m 0755 $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system
 install -m 0644 -t $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system init/kubernetes-{apiserver,controller-manager,kubelet,proxy}.service
 
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
+install -m 0644 -t $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig sysconfig/%{name}
+
 %files
 %defattr(-,root,root,-)
 %doc README.md
@@ -59,6 +64,7 @@ install -m 0644 -t $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system init/kubernetes-
 %{_bindir}/%{name}-kubelet
 %{_bindir}/%{name}-kubecfg
 %{_prefix}/lib/systemd/system/*.service
+%{_sysconfdir}/sysconfig/%{name}
 
 %post
 %systemd_post kubernetes-proxy.service kubernetes-integration.service kubernetes-apiserver.server kubernetes-controller-manager.service
