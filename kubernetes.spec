@@ -2,21 +2,31 @@
 %global debug_package %{nil}
 %global gopath  %{_datadir}/gocode
 
-%global commit      c78206d2f7567d5eed439f993ea56210b82a2b91
-%global shortcommit %(c=%{commit}; echo ${c:0:7})
+%global commit      14c379d27b8fbcc39e6945d7d91ee2d13c104a7e
+%global shortcommit %(c=%{commit}; echo ${c:0:8})
 
 Name:           kubernetes
 Version:        0
-Release:        0.0.11.git%{shortcommit}%{?dist}
+Release:        0.0.12.git%{shortcommit}%{?dist}
 Summary:        Kubernetes container management
 License:        ASL 2.0
 URL:            https://github.com/GoogleCloudPlatform/kubernetes
 ExclusiveArch:  x86_64
 Source0:        https://github.com/GoogleCloudPlatform/kubernetes/archive/%{commit}/kubernetes-%{shortcommit}.tar.gz
-Patch1:         0001-hack-install-package.sh-New-file-add-unit-files.patch
+Source1:	config
+Source2:	apiserver
+Source3:	controller-manager
+Source4:	proxy
+Source5:	kubelet
+Source6:	kube-apiserver.service
+Source7:	kube-controller-manager.service
+Source8:	kube-proxy.service
+Source9:	kubelet.service
+Patch1:         0001-hack-install-package.patch
 BuildRequires:  gcc
 BuildRequires:  git
 BuildRequires:  golang >= 1.2-7
+BuildRequires:	systemd
 Requires:       /usr/bin/docker
 Requires:       etcd
 
@@ -48,23 +58,25 @@ env GOPATH="${PWD}:%{_datadir}/gocode" ./hack/build-go.sh
 
 %install
 env DESTDIR=$RPM_BUILD_ROOT ./hack/install-package.sh
-install -d -m 0755 $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system
-install -m 0644 -t $RPM_BUILD_ROOT%{_prefix}/lib/systemd/system init/kubernetes-{apiserver,controller-manager,kubelet,proxy}.service
 
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
-install -m 0644 -t $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig sysconfig/%{name}
+# install config files
+install -d -m 0755 $RPM_BUILD_ROOT%{_sysconfdir}/kubernetes
+install -m 644 -t $RPM_BUILD_ROOT%{_sysconfdir}/kubernetes %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5}
+
+# install service files
+install -d -m 0755 $RPM_BUILD_ROOT%{_unitdir}
+install -m 0644 -t $RPM_BUILD_ROOT%{_unitdir} %{SOURCE6} %{SOURCE7} %{SOURCE8} %{SOURCE9}
 
 %files
 %defattr(-,root,root,-)
 %doc README.md
-%{_bindir}/%{name}-proxy
-%{_bindir}/%{name}-integration
-%{_bindir}/%{name}-apiserver
-%{_bindir}/%{name}-controller-manager
-%{_bindir}/%{name}-kubelet
-%{_bindir}/%{name}-kubecfg
-%{_prefix}/lib/systemd/system/*.service
-%{_sysconfdir}/sysconfig/%{name}
+%{_bindir}/*
+%{_unitdir}/*.service
+%config %{_sysconfdir}/kubernetes/config
+%config %{_sysconfdir}/kubernetes/apiserver
+%config %{_sysconfdir}/kubernetes/controller-manager
+%config %{_sysconfdir}/kubernetes/proxy
+%config %{_sysconfdir}/kubernetes/kubelet
 
 %post
 %systemd_post kubernetes-proxy.service kubernetes-integration.service kubernetes-apiserver.server kubernetes-controller-manager.service
@@ -76,5 +88,9 @@ install -m 0644 -t $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig sysconfig/%{name}
 %systemd_postun
 
 %changelog
+* Thu Aug 7 2014 Eric Paris <eparis@redhat.com>
+- update to head
+- update package to include config files
+
 * Wed Jul 16 2014 Colin Walters <walters@redhat.com>
 - Initial package
