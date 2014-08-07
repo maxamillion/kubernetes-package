@@ -1,177 +1,134 @@
-From eb1bcb7b7714c444f995e6b2d47eee83cb1b1991 Mon Sep 17 00:00:00 2001
+From b35eecb02955b5c584082f6a3c366c83b44da31b Mon Sep 17 00:00:00 2001
 From: Adam Miller <admiller@redhat.com>
 Date: Wed, 23 Jul 2014 15:45:38 -0500
 Subject: [PATCH] (walters@verbum.org) hack/install-package.sh: New file, add
  unit files; (admiller@redhat.com) add config file, use envs in unit files
 
 ---
- hack/build-go.sh                           |  2 --
- hack/config-go.sh                          |  6 ++++-
- hack/install-package.sh                    | 29 +++++++++++++++++++++++
- init/kubernetes-apiserver.service          | 15 ++++++++++++
- init/kubernetes-controller-manager.service | 12 ++++++++++
- init/kubernetes-kubelet.service            | 14 +++++++++++
- init/kubernetes-proxy.service              | 11 +++++++++
- sysconfig/kubernetes                       | 38 ++++++++++++++++++++++++++++++
- 8 files changed, 124 insertions(+), 3 deletions(-)
- create mode 100644 hack/install-package.sh
+ init/kubernetes-apiserver.service          |  24 +++++++
+ init/kubernetes-controller-manager.service |  16 +++++
+ init/kubernetes-kubelet.service            |  26 ++++++++
+ init/kubernetes-proxy.service              |  16 +++++
+ sysconfig/kubernetes                       | 101 +++++++++++++++++++++++++++++
+ 5 files changed, 183 insertions(+)
  create mode 100644 init/kubernetes-apiserver.service
  create mode 100644 init/kubernetes-controller-manager.service
  create mode 100644 init/kubernetes-kubelet.service
  create mode 100644 init/kubernetes-proxy.service
  create mode 100644 sysconfig/kubernetes
 
-diff --git a/hack/build-go.sh b/hack/build-go.sh
-index 4b41ec1..84681b7 100755
---- a/hack/build-go.sh
-+++ b/hack/build-go.sh
-@@ -25,8 +25,6 @@ source $(dirname $0)/config-go.sh
- 
- cd "${KUBE_TARGET}"
- 
--BINARIES="proxy integration apiserver controller-manager kubelet kubecfg"
--
- if [ $# -gt 0 ]; then
-   BINARIES="$@"
- fi
-diff --git a/hack/config-go.sh b/hack/config-go.sh
-index e25421b..a687ae3 100755
---- a/hack/config-go.sh
-+++ b/hack/config-go.sh
-@@ -49,6 +49,7 @@ KUBE_TARGET="${KUBE_REPO_ROOT}/output/go"
- mkdir -p "${KUBE_TARGET}"
- 
- KUBE_GO_PACKAGE=github.com/GoogleCloudPlatform/kubernetes
-+ORIG_GOPATH="$GOPATH"
- export GOPATH="${KUBE_TARGET}"
- KUBE_GO_PACKAGE_DIR="${GOPATH}/src/${KUBE_GO_PACKAGE}"
- 
-@@ -61,4 +62,7 @@ KUBE_GO_PACKAGE_DIR="${GOPATH}/src/${KUBE_GO_PACKAGE}"
-   rm "${KUBE_GO_PACKAGE_DIR}" >/dev/null 2>&1 || true
-   ln -s "${KUBE_REPO_ROOT}" "${KUBE_GO_PACKAGE_DIR}"
- )
--export GOPATH="${KUBE_TARGET}:${KUBE_REPO_ROOT}/third_party"
-+export GOPATH="${KUBE_TARGET}:${KUBE_REPO_ROOT}/third_party${ORIG_GOPATH:+:$ORIG_GOPATH}"
-+
-+# Default to building all of the components
-+BINARIES="proxy integration apiserver controller-manager kubelet kubecfg"
-diff --git a/hack/install-package.sh b/hack/install-package.sh
-new file mode 100755
-index 0000000..89acb33
---- /dev/null
-+++ b/hack/install-package.sh
-@@ -0,0 +1,29 @@
-+#!/bin/bash
-+
-+# Copyright 2014 Google Inc. All rights reserved.
-+#
-+# Licensed under the Apache License, Version 2.0 (the "License");
-+# you may not use this file except in compliance with the License.
-+# You may obtain a copy of the License at
-+#
-+#     http://www.apache.org/licenses/LICENSE-2.0
-+#
-+# Unless required by applicable law or agreed to in writing, software
-+# distributed under the License is distributed on an "AS IS" BASIS,
-+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-+# See the License for the specific language governing permissions and
-+# limitations under the License.
-+
-+# This script sets up a go workspace locally and builds all go components.
-+
-+set -e
-+
-+source $(dirname $0)/config-go.sh
-+
-+cd "${KUBE_TARGET}"
-+
-+install -d $DESTDIR/usr/bin
-+for b in $BINARIES; do
-+  echo "+++ INSTALLING ${b}"
-+  install -p -m 755 ${b} $DESTDIR/usr/bin/kubernetes-${b}
-+done
 diff --git a/init/kubernetes-apiserver.service b/init/kubernetes-apiserver.service
 new file mode 100644
-index 0000000..d271103
+index 0000000..ff9e006
 --- /dev/null
 +++ b/init/kubernetes-apiserver.service
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,24 @@
 +[Unit]
 +Description=Kubernetes API Server
 +
 +[Service]
 +EnvironmentFile=/etc/sysconfig/kubernetes
 +ExecStart=/usr/bin/kubernetes-apiserver \
-+            --logtostderr=${KUBE_LOGTOSTDERR} \
-+            --etcd_servers=${KUBE_ETCD_SERVERS} \
 +            --address=${KUBE_API_ADDRESS} \
++            --alsologtostderr=${KUBE_ALSOLOGTOSTDERR} \
++            --api_prefix=${KUBE_API_PREFIX} \
++            --cloud_provider=${KUBE_CLOUD_PROVIDER} \
++            --etcd_servers=${KUBE_ETCD_SERVERS} \
++            --health_check_minions=${KUBE_HEALTH_CHECK_MINIONS} \
++            --logtostderr=${KUBE_LOGTOSTDERR} \
++            --log_dir=${KUBE_LOG_DIR} \
++            --log_flush_frequency=${KUBE_LOG_FLUSH_FREQ} \
++            --machines=${KUBE_MACHINES} \
++            --minion_cache_ttl=${KUBE_MINION_CACHE_TTL} \
++            --minion_port=${KUBE_MINION_PORT} \
++            --minion_regexp=${KUBE_MINION_REGEX} \
 +            --port=${KUBE_API_PORT} \
-+            --machines=${KUBE_API_MACHINES}
++            --v=${KUBE_API_LOG_LEVEL}
 +
 +[Install]
 +WantedBy=multi-user.target
-+ 
 diff --git a/init/kubernetes-controller-manager.service b/init/kubernetes-controller-manager.service
 new file mode 100644
-index 0000000..ab318e6
+index 0000000..a99f353
 --- /dev/null
 +++ b/init/kubernetes-controller-manager.service
-@@ -0,0 +1,12 @@
+@@ -0,0 +1,16 @@
 +[Unit]
 +Description=Kubernetes Controller Manager
 +
 +[Service]
 +EnvironmentFile=/etc/sysconfig/kubernetes
 +ExecStart=/usr/bin/kubernetes-controller-manager \
++            --alsologtostderr=${KUBE_ALSOLOGTOSTDERR} \
++            --log_dir=${KUBE_LOG_DIR} \
 +            --logtostderr=${KUBE_LOGTOSTDERR} \
-+            --etcd_servers=${KUBE_ETCD_SERVERS} \
-+            --master=${KUBE_MASTER}
++            --log_flush_frequency=${KUBE_LOG_FLUSH_FREQ} \
++            --master=${KUBE_MASTER} \
++            --v=${KUBE_CONTROLLER_MANAGER_LOG_LEVEL}
++            
 +
 +[Install]
 +WantedBy=multi-user.target
 diff --git a/init/kubernetes-kubelet.service b/init/kubernetes-kubelet.service
 new file mode 100644
-index 0000000..bb2cfdd
+index 0000000..3d4ce30
 --- /dev/null
 +++ b/init/kubernetes-kubelet.service
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,26 @@
 +[Unit]
 +Description=Kubernetes Kubelet
 +
 +[Service]
 +EnvironmentFile=/etc/sysconfig/kubernetes
 +ExecStart=/usr/bin/kubernetes-kubelet \
-+            --logtostderr=${KUBE_LOGTOSTDERR} \
-+            --etcd_servers=${KUBE_ETCD_SERVERS} \
 +            --address=${KUBE_KUBELET_ADDRESS} \
++            --alsologtostderr=${KUBE_ALSOLOGTOSTDERR} \
++            --config=${KUBE_KUBELET_CONFIG} \
++            --docker_endpoint=${KUBE_KUBELET_DOCKER_ENDPOINT} \
++            --etcd_servers=${KUBE_ETCD_SERVERS} \
++            --enable_server=${KUBE_KUBELET_INFO_SERVER} \
++            --file_check_frequency=${KUBE_KUBELET_CONFFILE_CHECK_FREQ} \
++            --hostname_override=${KUBE_KUBELETE_HOSTNAME_OVERRIDE} \
++            --http_check_frequency=${KUBE_KUBELET_HTTP_CHECK_FREQ} \
++            --log_dir=${KUBE_LOG_DIR} \
++            --log_flush_frequency=${KUBE_LOG_FLUSH_FREQ} \
++            --logtostderr=${KUBE_LOGTOSTDERR} \
++            --manifest_url=${KUBE_KUBELET_MANIFEST_URL} \
 +            --port=${KUBE_KUBELET_PORT} \
-+            --hostname_override=${KUBE_KUBELET_HOSTNAME_OVERRIDE}
++            --root_dir=${KUBE_KUBELET_ROOT_DIR} \
++            --sync_frequency=${KUBE_KUBELET_SYNC_FREQ} \
++            --v=${KUBE_KUBELET_LOG_LEVEL}
 +
 +[Install]
 +WantedBy=multi-user.target
 diff --git a/init/kubernetes-proxy.service b/init/kubernetes-proxy.service
 new file mode 100644
-index 0000000..bb99909
+index 0000000..a284f6a
 --- /dev/null
 +++ b/init/kubernetes-proxy.service
-@@ -0,0 +1,11 @@
+@@ -0,0 +1,16 @@
 +[Unit]
 +Description=Kubernetes Proxy
 +
 +[Service]
 +EnvironmentFile=/etc/sysconfig/kubernetes
 +ExecStart=/usr/bin/kubernetes-proxy \
++            --alsologtostderr=${KUBE_ALSOLOGTOSTDERR} \
++            --configfile=${KUBE_PROXY_CONFIG_FILE} \
++            --etcd_servers=${KUBE_ETCD_SERVERS} \
 +            --logtostderr=${KUBE_LOGTOSTDERR} \
-+            --etcd_servers=${KUBE_ETCD_SERVERS}
++            --log_dir=${KUBE_LOG_DIR} \
++            --log_flush_frequency=${KUBE_LOG_FLUSH_FREQ} \
++            --v=${KUBE_PROXY_LOG_LEVEL}
 +
 +[Install]
 +WantedBy=multi-user.target
 diff --git a/sysconfig/kubernetes b/sysconfig/kubernetes
 new file mode 100644
-index 0000000..1aabbd1
+index 0000000..18274ef
 --- /dev/null
 +++ b/sysconfig/kubernetes
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,101 @@
 +###
 +# kubernetes system config
 +#
@@ -185,31 +142,94 @@ index 0000000..1aabbd1
 +#
 +#
 +
-+# GLOBAL
++##### GLOBAL
 +# These items are used across all service components.
 +
 +KUBE_MASTER="127.0.0.1:8080"
 +
++# Comma delimited list
++KUBE_MACHINES="127.0.0.1"
++
++# Comma delimited list
 +KUBE_ETCD_SERVERS="http://127.0.0.1:4001"
 +
-+KUBE_LOGTOSTDERR="true"
++KUBE_LOGTOSTDERR="false"
 +
-+# API SERVER
++KUBE_ALSOLOGTOSTDERR="false"
++
++# upstream default
++KUBE_LOG_FLUSH_FREQ="5s"
++
++KUBE_LOG_DIR="/var/log/kubernetes/"
++
++KUBE_CLOUD_PROVIDER=''
++
++KUBE_HEALTH_CHECK_MINIONS='false'
++
++# upstream default
++KUBE_MINION_CACHE_TTL="30s"
++
++# upstream default
++KUBE_MINION_PORT="10250"
++
++KUBE_MINION_REGEX=''
++
++##### API SERVER
 +# Items specific to kubernetes-apiserver.service
 +KUBE_API_ADDRESS="127.0.0.1"
 +
 +KUBE_API_PORT="8080"
 +
-+KUBE_API_MACHINES="127.0.0.1"
++# upstream default
++KUBE_API_PREFIX="/api/v1beta1"
 +
 +
-+# KUBELET
++# upstream default
++KUBE_API_LOG_LEVEL=0
++
++##### CONTROLLER MANAGER
++# Items specific to kubernetes-controller-manager.service
++KUBE_CONTROLLER_MANAGER_LOG_LEVEL=0
++
++##### KUBELET
 +# Items specific to kubernetes-kubelet.service
 +KUBE_KUBELET_ADDRESS="127.0.0.1"
 +
 +KUBE_KUBELET_PORT="10250"
 +
 +KUBE_KUBELET_HOSTNAME_OVERRIDE="127.0.0.1"
++
++KUBE_KUBELET_CONFIG=''
++
++KUBE_KUBELET_DOCKER_ENDPOINT=''
++
++KUBE_KUBELET_INFO_SERVER="true"
++
++# upstream default
++KUBE_KUBELET_CONFFILE_CHECK_FREQ="20s"
++
++# upstream default
++KUBE_KUBELET_HTTP_CHECK_FREQ="20s"
++
++KUBE_KUBELET_MANIFEST_URL=''
++
++# upstream default
++KUBE_KUBELET_ROOT_DIR='/var/lib/kubelet'
++
++# upstream default
++KUBE_KUBELET_SYNC_FREQ="10s"
++
++# upstream default
++KUBE_KUBELET_LOG_LEVEL=0
++
++##### PROXY
++# Items specific to kubernetes-proxy.service
++
++# upstream default
++KUBE_PROXY_LOG_LEVEL=0
++
++# upstream default
++KUBE_PROXY_CONFIG_FILE='/tmp/proxy_config'
 -- 
 1.9.3
 
