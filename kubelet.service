@@ -11,6 +11,8 @@ ExecStart=/usr/bin/kubelet \
             --address=${MINION_ADDRESS} \
             --port=${MINION_PORT} \
 	    --hostname_override=${MINION_HOSTNAME}
+Requires=cadvisor.service
+After=cadvisor.service
 
 [Install]
 WantedBy=multi-user.target

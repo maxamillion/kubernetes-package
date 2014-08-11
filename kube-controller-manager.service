@@ -7,7 +7,6 @@ EnvironmentFile=/etc/kubernetes/controller-manager
 ExecStart=/usr/bin/kube-controller-manager \
             --logtostderr=${KUBE_LOGTOSTDERR} \
 	    --v=${KUBE_LOG_LEVEL} \
-            --etcd_servers=${KUBE_ETCD_SERVERS} \
             --master=${KUBE_MASTER}
 
 [Install]
