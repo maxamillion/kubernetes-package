@@ -2,7 +2,7 @@
 %global debug_package	%{nil}
 %global gopath		%{_datadir}/gocode
 %global import_path	github.com/GoogleCloudPlatform/kubernetes
-%global commit		e35dfedd794136e06dee1c7001ae5088021c03d0
+%global commit		71c6e082d497696a9875d62412f22ae9d19d2491
 %global shortcommit	%(c=%{commit}; echo ${c:0:8})
 
 #binaries which should be called kube-*
@@ -14,7 +14,7 @@
 
 Name:		kubernetes
 Version:	0
-Release:	0.0.15.git%{shortcommit}%{?dist}
+Release:	0.0.16.git%{shortcommit}%{?dist}
 Summary:	Kubernetes container management
 License:	ASL 2.0
 URL:		https://github.com/GoogleCloudPlatform/kubernetes
