@@ -41,6 +41,7 @@ BuildRequires:	git
 BuildRequires:	golang >= 1.2-7
 BuildRequires:	systemd
 BuildRequires:	golang-cover
+BuildRequires:	etcd
 
 BuildRequires:	golang(bitbucket.org/kardianos/osext)
 BuildRequires:	golang(github.com/coreos/go-log/log)
@@ -118,7 +119,10 @@ hack/build-go.sh
 
 %check
 export GOPATH=%{gopath}
+echo "******Testing the go code******"
 hack/test-go.sh
+echo "******Testing the commands******"
+hack/test-cmd.sh
 
 %install
 install -m 755 -d %{buildroot}%{_bindir}
