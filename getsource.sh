@@ -12,4 +12,4 @@ VAL=`sed -n -e "s/Release:\t[[:digit:]]*.[[:digit:]]*.\([[:digit:]]*\).git.*/\1/
 VAL=$((VAL + 1))
 sed -i -e "s/\(Release:\t[[:digit:]]*.[[:digit:]]*.\)\([[:digit:]]*\)\(.git\)/\1${VAL}\3/" kubernetes.spec
 
-sha256sum kubernetes-*.tar.gz kubernetes.spec > sources
+sha256sum *.patch kubernetes-*.tar.gz kubernetes.spec > sources

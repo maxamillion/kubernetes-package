@@ -2,7 +2,7 @@
 %global debug_package	%{nil}
 %global gopath		%{_datadir}/gocode
 %global import_path	github.com/GoogleCloudPlatform/kubernetes
-%global commit		71c6e082d497696a9875d62412f22ae9d19d2491
+%global commit		aeea1b1e06ef2342942eead2e19be37333922a91
 %global shortcommit	%(c=%{commit}; echo ${c:0:8})
 
 #binaries which should be called kube-*
@@ -14,7 +14,7 @@
 
 Name:		kubernetes
 Version:	0
-Release:	0.0.16.git%{shortcommit}%{?dist}
+Release:	0.0.17.git%{shortcommit}%{?dist}
 Summary:	Kubernetes container management
 License:	ASL 2.0
 URL:		https://github.com/GoogleCloudPlatform/kubernetes
@@ -48,6 +48,7 @@ BuildRequires:	golang(bitbucket.org/kardianos/osext)
 BuildRequires:	golang(github.com/coreos/go-log/log)
 BuildRequires:	golang(github.com/coreos/go-systemd)
 BuildRequires:	golang(github.com/coreos/go-etcd/etcd)
+BuildRequires:	golang(github.com/google/gofuzz)
 BuildRequires:	golang(code.google.com/p/go.net)
 BuildRequires:	golang(code.google.com/p/goauth2)
 BuildRequires:	golang(code.google.com/p/go-uuid)
