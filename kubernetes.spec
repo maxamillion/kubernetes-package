@@ -59,17 +59,34 @@ BuildRequires:	golang(github.com/google/cadvisor)
 %autosetup -Sgit -n %{name}-%{commit}
 
 rm -r third_party/src/bitbucket.org/kardianos/osext
+rmdir third_party/src/bitbucket.org/kardianos
+rmdir third_party/src/bitbucket.org/
 
 rm -r third_party/src/code.google.com/p/go.net
 rm -r third_party/src/code.google.com/p/goauth2
 rm -r third_party/src/code.google.com/p/go-uuid
 rm -r third_party/src/code.google.com/p/google-api-go-client
+rmdir third_party/src/code.google.com/p
+rmdir third_party/src/code.google.com/
+
 rm -r third_party/src/gopkg.in/v1/yaml/
+rmdir third_party/src/gopkg.in/v1/
+rmdir third_party/src/gopkg.in/
+
 rm -r third_party/src/gonuts.org/v1/yaml/
+rmdir third_party/src/gonuts.org/v1/
+rmdir third_party/src/gonuts.org/
+
 rm -r third_party/src/github.com/coreos/go-{log,systemd,etcd}
+rmdir third_party/src/github.com/coreos/
 rm -r third_party/src/github.com/fsouza/go-dockerclient
 rm -r third_party/src/github.com/golang/glog
+rmdir third_party/src/github.com/golang/
 rm -r third_party/src/github.com/google/cadvisor/
+rmdir third_party/src/github.com/google/
+rm -r third_party/src/github.com/stretchr/objx
+rm -r third_party/src/github.com/stretchr/testify/
+rmdir third_party/src/github.com/stretchr/
 
 # FIXME (if we can)
 # Unable to remove go-dockerclient-copiedstructs because this is not really
@@ -77,6 +94,16 @@ rm -r third_party/src/github.com/google/cadvisor/
 # yaml annotation which they use for testing and I think marshalling and
 # unmashalling....
 # rm -r third_party/src/github.com/fsouza/go-dockerclient-copiedstructs
+# rmdir third_party/src/github.com/fsouza/
+# rmdir third_party/src/github.com/f
+# rmdir third_party/src/
+# rmdir third_party/
+# So instead, just explode if there is anything left other than this one...
+FILES=`find third_party/src -type f`
+if [[ $FILES != "third_party/src/github.com/fsouza/go-dockerclient-copiedstructs/container.go" ]]; then
+	echo "UNPACKED THIRD PARTY SOFTWARE FOUND!"
+	exit 1
+fi
 
 # Set the "version number", currently git commit id upstream 
 sed "s/@@GIT_COMMIT@@/%{shortcommit}/g" \
