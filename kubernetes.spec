@@ -162,10 +162,10 @@ install -m 0644 -t $RPM_BUILD_ROOT%{_unitdir} %{SOURCE6} %{SOURCE7} %{SOURCE8} %
 %config(noreplace) %{_sysconfdir}/kubernetes/kubelet
 
 %post
-%systemd_post kubernetes-proxy.service kubernetes-integration.service kubernetes-apiserver.server kubernetes-controller-manager.service
+%systemd_post %{SOURCE6} %{SOURCE7} %{SOURCE8} %{SOURCE9}
 
 %preun
-%systemd_preun kubernetes-proxy.service kubernetes-integration.service kubernetes-apiserver.server kubernetes-controller-manager.service
+%systemd_preun %{SOURCE6} %{SOURCE7} %{SOURCE8} %{SOURCE9}
 
 %postun
 %systemd_postun
