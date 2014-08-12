@@ -47,6 +47,8 @@ BuildRequires:	golang(code.google.com/p/go-uuid)
 BuildRequires:	golang(code.google.com/p/google-api-go-client)
 BuildRequires:	golang(github.com/fsouza/go-dockerclient)
 BuildRequires:	golang(github.com/golang/glog)
+BuildRequires:	golang(github.com/stretchr/objx)
+BuildRequires:	golang(github.com/stretchr/testify)
 BuildRequires:	golang(gopkg.in/v1/yaml)
 BuildRequires:	golang(github.com/google/cadvisor)
 
