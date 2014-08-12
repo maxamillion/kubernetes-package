@@ -6,9 +6,9 @@
 
 Name:           golang-github-google-gofuzz
 Version:        0
-Release:        0.1.git%{shortcommit}%{?dist}
+Release:        0.2.git%{shortcommit}%{?dist}
 Summary:        library for populating go objects with random values
-License:        MIT
+License:        ASL 2.0
 URL:            http://godoc.org/%{import_path}
 Source0:        https://%{import_path}/archive/%{commit}/gofuzz-%{shortcommit}.tar.gz
 BuildArch:      noarch
@@ -41,5 +41,10 @@ cp -av *.go %{buildroot}/%{gopath}/src/%{import_path}
 %{gopath}/src/%{import_path}/*
 
 %changelog
+* Tue Aug 12 2014 Adam Miller <maxamillion@fedoraproject.org> - 0.2.gitaef70da
+- Fix License
+
+* Mon Aug 11 2014 Adam Miller <maxamillion@fedoraproject.org> - 0.1.gitaef70da
+- First package for Fedora.
 * Mon Aug 11 2014 Adam Miller <maxamillion@fedoraproject.org> - 0.1.gitaef70da
 - First package for Fedora.
