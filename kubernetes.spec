@@ -31,13 +31,16 @@ Source8:	kube-proxy.service
 Source9:	kubelet.service
 Patch1:		0001-Use-go-build-not-go-install-because-of-golang-issue.patch
 Patch2:		0002-Respect-version-passed-in-via-environment-variable.patch
+
+Requires:	/usr/bin/docker
+Requires:	etcd
+Requires:	cadvisor
+
 BuildRequires:	gcc
 BuildRequires:	git
 BuildRequires:	golang >= 1.2-7
 BuildRequires:	systemd
-Requires:	/usr/bin/docker
-Requires:	etcd
-Requires:	cadvisor
+BuildRequires:	golang-cover
 
 BuildRequires:	golang(bitbucket.org/kardianos/osext)
 BuildRequires:	golang(github.com/coreos/go-log/log)
@@ -112,6 +115,10 @@ export git_commit="%{shortcommit}-dirty"
 export GOPATH=%{gopath}
 
 hack/build-go.sh
+
+%check
+export GOPATH=%{gopath}
+hack/test-go.sh
 
 %install
 install -m 755 -d %{buildroot}%{_bindir}
