@@ -14,7 +14,7 @@
 
 Name:		kubernetes
 Version:	0
-Release:	0.0.18.git%{shortcommit}%{?dist}
+Release:	0.0.19.git%{shortcommit}%{?dist}
 Summary:	Kubernetes container management
 License:	ASL 2.0
 URL:		https://github.com/GoogleCloudPlatform/kubernetes
@@ -128,10 +128,10 @@ getent group kube >/dev/null || groupadd -r kube
 getent passwd kube >/dev/null || useradd -r -g kube -d / -s /sbin/nologin \
         -c "Kubernetes user" kube
 %post
-%systemd_post %{SOURCE6} %{SOURCE7} %{SOURCE8} %{SOURCE9}
+%systemd_post %{basename:%{SOURCE6}} %{basename:%{SOURCE7}} %{basename:%{SOURCE8}} %{basename:%{SOURCE9}}
 
 %preun
-%systemd_preun %{SOURCE6} %{SOURCE7} %{SOURCE8} %{SOURCE9}
+%systemd_preun %{basename:%{SOURCE6}} %{basename:%{SOURCE7}} %{basename:%{SOURCE8}} %{basename:%{SOURCE9}}
 
 %postun
 %systemd_postun
