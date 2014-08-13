@@ -14,7 +14,7 @@
 
 Name:		kubernetes
 Version:	0
-Release:	0.0.17.git%{shortcommit}%{?dist}
+Release:	0.0.18.git%{shortcommit}%{?dist}
 Summary:	Kubernetes container management
 License:	ASL 2.0
 URL:		https://github.com/GoogleCloudPlatform/kubernetes
@@ -36,6 +36,8 @@ Patch3:		0003-remove-all-third-party-software.patch
 Requires:	/usr/bin/docker
 Requires:	etcd
 Requires:	cadvisor
+
+Requires(pre):	shadow-utils
 
 BuildRequires:	gcc
 BuildRequires:	git
@@ -121,6 +123,10 @@ install -m 0644 -t $RPM_BUILD_ROOT%{_unitdir} %{SOURCE6} %{SOURCE7} %{SOURCE8} %
 %config(noreplace) %{_sysconfdir}/kubernetes/proxy
 %config(noreplace) %{_sysconfdir}/kubernetes/kubelet
 
+%pre
+getent group kube >/dev/null || groupadd -r kube
+getent passwd kube >/dev/null || useradd -r -g kube -d / -s /sbin/nologin \
+        -c "Kubernetes user" kube
 %post
 %systemd_post %{SOURCE6} %{SOURCE7} %{SOURCE8} %{SOURCE9}
 
@@ -131,6 +137,13 @@ install -m 0644 -t $RPM_BUILD_ROOT%{_unitdir} %{SOURCE6} %{SOURCE7} %{SOURCE8} %
 %systemd_postun
 
 %changelog
+* Wed Aug 13 2014 Eric Paris <eparis@redhat.com>
+- update to upstream
+- redo build to use project scripts
+- use project scripts in %check
+- rework deletion of third_party packages to easily detect changes
+- run apiserver and controller-manager as non-root
+
 * Mon Aug 11 2014 Adam Miller <maxamillion@redhat.com>
 - update to upstream
 - decouple the rest of third_party

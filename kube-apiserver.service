@@ -4,6 +4,7 @@ Description=Kubernetes API Server
 [Service]
 EnvironmentFile=/etc/kubernetes/config
 EnvironmentFile=/etc/kubernetes/apiserver
+User=kube
 ExecStart=/usr/bin/kube-apiserver \
             --logtostderr=${KUBE_LOGTOSTDERR} \
 	    --v=${KUBE_LOG_LEVEL} \
