@@ -1,15 +1,21 @@
-%global commit ba041ddf654c5bea988d478e2224352748f80404
-%global shortcommit %(c=%{commit}; echo ${c:0:7})
-%global import_path     github.com/google/cadvisor
-%global gopath          %{_datadir}/gocode
+%global provider	github
+%global provider_tld	com
+%global project		google
+%global repo		cadvisor
+%global commit		17b0ec576bcbeb321c133e4378dee1e500c9850d
 
-Name:           cadvisor
+%global import_path	%{provider}.%{provider_tld}/%{project}/%{repo}
+%global gopath		%{_datadir}/gocode
+%global shortcommit	%(c=%{commit}; echo ${c:0:8})
+%global debug_package	%{nil}
+
+Name:		%{repo}
 Version:        0.2.0
-Release:        2%{?dist}
+Release:        3.git%{shortcommit}%{?dist}
 Summary:        Analyzes resource usage and performance characteristics of running containers.
 License:        ASL2.0
-URL:            http://%{import_path}
-Source0:        https://github.com/google/cadvisor/archive/%{commit}/cadvisor-%{shortcommit}.tar.gz
+URL:            https://%{import_path}
+Source0:        https://%{import_path}/archive/%{commit}/%{repo}-%{shortcommit}.tar.gz
 Patch0:         0001-add-systemd-unit-file-sysconfig.patch
 BuildRequires:  docker-io-pkg-devel
 BuildRequires:  systemd
@@ -182,5 +188,8 @@ done
 %{gopath}/src/%{import_path}/utils/*
 
 %changelog
+* Wed Aug 20 2014 Eric Paris <eparis@redhat.com - 0.2.0-2
+- Bump to upstream 17b0ec576bcbeb321c133e4378dee1e500c9850d
+
 * Thu Aug 07 2014 Adam Miller <maxamillion@fedoraproject.org> - 0.2.0-1
 - First package for Fedora

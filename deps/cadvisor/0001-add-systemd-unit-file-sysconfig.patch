@@ -1,0 +1,95 @@
+From e0941aec8f46babbb7b439e80fc5ec23e30d58b9 Mon Sep 17 00:00:00 2001
+From: Adam Miller <admiller@redhat.com>
+Date: Fri, 8 Aug 2014 16:26:53 -0500
+Subject: [PATCH] add systemd unit file, sysconfig
+
+---
+ init/cadvisor.service | 19 +++++++++++++++++++
+ sysconfig/cadvisor    | 49 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 68 insertions(+)
+ create mode 100644 init/cadvisor.service
+ create mode 100644 sysconfig/cadvisor
+
+diff --git a/init/cadvisor.service b/init/cadvisor.service
+new file mode 100644
+index 0000000..0000051
+--- /dev/null
++++ b/init/cadvisor.service
+@@ -0,0 +1,19 @@
++[Unit]
++Description=cAdvisor
++
++[Service]
++EnvironmentFile=/etc/sysconfig/cadvisor
++ExecStart=/usr/bin/cadvisor \
++	--docker=${CADVISOR_DOCKER_ENDPOINT} \
++	--history_duration=${CADVISOR_HISTORY_DURATION} \
++	--port=${CADVISOR_PORT} \
++	--samples=${CADVISOR_SAMPLES} \
++	--storage_driver=${CADVISOR_STORAGE_DRIVER} \
++	--storage_driver_host=${CADVISOR_STORAGE_DRIVER_HOST} \
++	--storage_driver_name=${CADVISOR_STORAGE_DRIVER_NAME} \
++	--storage_driver_password=${CADVISOR_STORAGE_DRIVER_PASSWORD} \
++	--storage_driver_secure=${CADVISOR_STORAGE_DRIVER_SECURE} \
++	--storage_driver_user=${CADVISOR_STORAGE_DRIVER_USER}
++
++[Install]
++WantedBy=multi-user.target
+diff --git a/sysconfig/cadvisor b/sysconfig/cadvisor
+new file mode 100644
+index 0000000..9a3593e
+--- /dev/null
++++ b/sysconfig/cadvisor
+@@ -0,0 +1,49 @@
++# config options for cAdvisor
++#
++#
++
++# Docker endpoint to connect to
++# Default: unix:///var/run/docker.sock
++CADVISOR_DOCKER_ENDPOINT="unix:///var/run/docker.sock"
++
++# Number of seconds of container history to keep
++# Default: 60 seconds
++CADVISOR_HISTORY_DURATION="60"
++
++# Port to listen on
++# Default: 8080
++# kubernetes expects it on port 4194
++CADVISOR_PORT="4194"
++
++# Samples
++# Number of samples to keep
++# Default: 1024
++CADVISOR_SAMPLES="1024"
++
++# Storage driver
++# Default: memory
++#
++# Available Options:
++#  - memory
++#  - influxdb
++CADVISOR_STORAGE_DRIVER="memory"
++
++# Storage driver host
++# Default: localhost:8086"
++CADVISOR_STORAGE_DRIVER_HOST="localhost:8086"
++
++# Storage driver name
++# Default: cadvisor
++CADVISOR_STORAGE_DRIVER_NAME="cadvisor"
++
++# Storage driver password
++# Default: root
++CADVISOR_STORAGE_DRIVER_PASSWORD="root"
++
++# Storage driver secure connection
++# Default: false
++CADVISOR_STORAGE_DRIVER_SECURE="false"
++
++# Storage driver user
++# Default: root
++CADVISOR_STORAGE_DRIVER_USER="root"
+-- 
+1.9.3
+
