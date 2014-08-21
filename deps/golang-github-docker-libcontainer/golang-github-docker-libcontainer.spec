@@ -1,22 +1,29 @@
-%global debug_package   %{nil}
-%global import_path     github.com/docker/libcontainer
-%global commit          5589d4d879f1d7e31967a927d3e8b98144fbe06b
-%global shortcommit     %(c=%{commit}; echo ${c:0:7})
+%global provider	github
+%global provider_tld	com
+%global project		docker
+%global repo		libcontainer
+%global commit		edfe81a08b2780ad75b63e60b6cb9eb3a17c671f
 
-Name:           golang-github-docker-libcontainer
-Version:        1.1.0
-Release:        6.0.2.git%{shortcommit}%{?dist}
-Summary:        Configuration options for containers
-License:        ASL 2.0
-URL:            https://%{import_path}
-Source0:        https://%{import_path}/archive/%{commit}/libcontainer-%{shortcommit}.tar.gz
-ExclusiveArch:  x86_64
-BuildRequires:  golang(github.com/codegangsta/cli) >= 1.1.0-1
-BuildRequires:  golang(github.com/coreos/go-systemd/activation)
-BuildRequires:  golang(github.com/coreos/go-systemd/dbus)
-BuildRequires:  golang(github.com/godbus/dbus)
-BuildRequires:  docker-io-pkg-devel
-Provides:       nsinit
+%global import_path	%{provider}.%{provider_tld}/%{project}/%{repo}
+%global gopath		%{_datadir}/gocode
+%global shortcommit	%(c=%{commit}; echo ${c:0:8})
+%global debug_package	%{nil}
+
+Name:		golang-%{provider}-%{project}-%{repo}
+Version:	1.1.0
+Release:	8.0.0.git%{shortcommit}%{?dist}
+Summary:	Configuration options for containers
+License:	ASL 2.0
+URL:		https://%{import_path}
+Source0:	https://%{import_path}/archive/%{commit}/%{repo}-%{shortcommit}.tar.gz
+ExclusiveArch:	x86_64
+BuildRequires:	git
+BuildRequires:	golang(github.com/codegangsta/cli) >= 1.1.0-1
+BuildRequires:	golang(github.com/coreos/go-systemd/activation)
+BuildRequires:	golang(github.com/coreos/go-systemd/dbus)
+BuildRequires:	golang(github.com/godbus/dbus)
+BuildRequires:	docker-io-pkg-devel
+Provides:	nsinit
 
 %description
 libcontainer specifies configuration options for what a container is. It
@@ -28,29 +35,29 @@ This package provides the nsinit binary as well, but it is currently for
 debugging purposes only and not officially supported.
 
 %package devel
-BuildRequires:  golang
-BuildRequires:  golang(github.com/syndtr/gocapability/capability)
-Requires:       golang
-Requires:       golang(github.com/syndtr/gocapability/capability)
-Summary:        Configuration options for containers
-Provides:       golang(%{import_path}) = %{version}-%{release}
-Provides:       golang(%{import_path}/apparmor) = %{version}-%{release}
-Provides:       golang(%{import_path}/cgroups) = %{version}-%{release}
-Provides:       golang(%{import_path}/cgroups/fs) = %{version}-%{release}
-Provides:       golang(%{import_path}/cgroups/systemd) = %{version}-%{release}
-Provides:       golang(%{import_path}/console) = %{version}-%{release}
-Provides:       golang(%{import_path}/devices) = %{version}-%{release}
-Provides:       golang(%{import_path}/label) = %{version}-%{release}
-Provides:       golang(%{import_path}/mount) = %{version}-%{release}
-Provides:       golang(%{import_path}/mount/nodes) = %{version}-%{release}
-Provides:       golang(%{import_path}/namespaces) = %{version}-%{release}
-Provides:       golang(%{import_path}/netlink) = %{version}-%{release}
-Provides:       golang(%{import_path}/network) = %{version}-%{release}
-Provides:       golang(%{import_path}/nsinit) = %{version}-%{release}
-Provides:       golang(%{import_path}/security/capabilities) = %{version}-%{release}
-Provides:       golang(%{import_path}/security/restrict) = %{version}-%{release}
-Provides:       golang(%{import_path}/selinux) = %{version}-%{release}
-Provides:       golang(%{import_path}/utils) = %{version}-%{release}
+BuildRequires:	golang
+BuildRequires:	golang(github.com/syndtr/gocapability/capability)
+Requires:	golang
+Requires:	golang(github.com/syndtr/gocapability/capability)
+Summary:	Configuration options for containers
+Provides:	golang(%{import_path}) = %{version}-%{release}
+Provides:	golang(%{import_path}/apparmor) = %{version}-%{release}
+Provides:	golang(%{import_path}/cgroups) = %{version}-%{release}
+Provides:	golang(%{import_path}/cgroups/fs) = %{version}-%{release}
+Provides:	golang(%{import_path}/cgroups/systemd) = %{version}-%{release}
+Provides:	golang(%{import_path}/console) = %{version}-%{release}
+Provides:	golang(%{import_path}/devices) = %{version}-%{release}
+Provides:	golang(%{import_path}/label) = %{version}-%{release}
+Provides:	golang(%{import_path}/mount) = %{version}-%{release}
+Provides:	golang(%{import_path}/mount/nodes) = %{version}-%{release}
+Provides:	golang(%{import_path}/namespaces) = %{version}-%{release}
+Provides:	golang(%{import_path}/netlink) = %{version}-%{release}
+Provides:	golang(%{import_path}/network) = %{version}-%{release}
+Provides:	golang(%{import_path}/nsinit) = %{version}-%{release}
+Provides:	golang(%{import_path}/security/capabilities) = %{version}-%{release}
+Provides:	golang(%{import_path}/security/restrict) = %{version}-%{release}
+Provides:	golang(%{import_path}/selinux) = %{version}-%{release}
+Provides:	golang(%{import_path}/utils) = %{version}-%{release}
 
 %description devel
 libcontainer specifies configuration options for what a container is. It
@@ -62,31 +69,32 @@ This package contains library source intended for building other packages
 which use libcontainer.
 
 %prep
-%setup -n libcontainer-%{commit}
+%autosetup -Sgit -n %{repo}-%{commit}
 
 %build
+# This is so that go can find that stuff in the build root by searching the
+# path starting at GOPATH and looking in src
 mkdir -p ./_build/src/github.com/docker
 ln -s $(pwd) ./_build/src/%{import_path}
-
 export GOPATH=$(pwd)/_build:%{gopath}
-pushd $(pwd)/_build/src/%{import_path}/nsinit/nsinit
+
+pushd $(pwd)/nsinit/
 go build 
 popd
 
 %install
 for dir in . apparmor cgroups cgroups/fs cgroups/systemd \
-            console devices label mount mount/nodes namespaces \
-            netlink network nsinit security/capabilities \
-            security/restrict selinux syncpipe system user utils
+	console devices label mount mount/nodes namespaces \
+	netlink network nsinit security/capabilities \
+	security/restrict selinux syncpipe system user utils
 do
-
     install -d -p %{buildroot}%{gopath}/src/%{import_path}/$dir
     cp -pav $dir/*.go %{buildroot}%{gopath}/src/%{import_path}/$dir
 done
 
 # Install nsinit
 install -d %{buildroot}%{_bindir}
-install -p -m 755 ./_build/src/%{import_path}/nsinit/nsinit/nsinit %{buildroot}%{_bindir}/nsinit
+install -p -m 755 nsinit/nsinit %{buildroot}%{_bindir}/nsinit
 
 %check
 
@@ -142,6 +150,13 @@ install -p -m 755 ./_build/src/%{import_path}/nsinit/nsinit/nsinit %{buildroot}%
 %{gopath}/src/%{import_path}/utils/*.go
 
 %changelog
+* Wed Aug 20 2014 Eric Paris <eparis@redhat.com - 1.1.0-6.0.3.gitedfe81a0
+- Bump to upstream edfe81a08b2780ad75b63e60b6cb9eb3a17c671f
+
+-* Fri Aug 15 2014 Lokesh Mandvekar <lsm5@fedoraproject.org> - 1.1.0-7.git
+-- Resolves: rhbz#1130500
+-- update to upstream commit 29363e2d2d7b8f62a5f353be333758f83df540a9
+
 * Wed Aug 06 2014 Adam Miller <maxamillion@fedoraproject.org> - 1.1.0-6.0.2.git5589d4d
 - Update to latest from upstream master for cAdvisor
 
